@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simple Chat App</title>
+</head>
+<body>
+  <h1>Chat Room - CHAT ID: {{ chat.pk }}</h1><a href="/chat/">list all</a>
+  <div class="context">
+      <p>Set you context here</p>
+      <textarea cols="100" rows="1">{% if chat.context %}{{ chat.context }}{% endif %}</textarea>
+  </div>
+  <div id="chat-box">
+      <div class="heading">HISTORY (CTX:900/2000 [40%])</div>
+      <br><br>
+      {% for message in chat.history %}
+      <div class="message">
+          {% autoescape off %}
+            <div class="author">{{message.role }}</div>
+            <div class="content">{{message.parts}}</div>
+          {% endautoescape %}
+        </div>
+      <br>
+      {% endfor %}
+  </div>
+  <div class="input-section">
+    <textarea name="message" cols="100" rows="1"></textarea>
+    <button type="submit">Send</button>
+  </div>
+</body>
+<script>
+<!--      on submit press, we need to send a payload with the message and context to chat/update/chat_id-->
+document.querySelector('button').addEventListener('click', function() {
+    const message = document.querySelector('textarea[name="message"]').value;
+    const context = document.querySelector('.context textarea').value;
+
+    document.querySelector('textarea[name="message"]').value = '';
+    const messageElement = document.createElement('div');
+    messageElement.classList.add('message');
+    messageElement.innerHTML = `
+        <div class="content">${message}</div>
+    `;
+    document.querySelector('#chat-box').appendChild(messageElement);
+
+    const responseElement = document.createElement('div');
+    responseElement.classList.add('message');
+    responseElement.innerHTML = '<p>loading llm response...</p>';
+    document.querySelector('#chat-box').appendChild(responseElement);
+
+
+    fetch('/api/chat/{{chat.pk}}/', {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            message,
+            context,
+        }),
+    })
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error(`Network response was not ok status: ${response.status}`);
+            }
+            return response.json()
+        })
+        .then((data) => {
+            console.log(data);
+            <!--      on success, we need to append the message to the chat-box-->
+
+                const chats = document.querySelector("#chat-box")
+                const lastChild = chats.querySelector(':last-child');
+
+                lastChild.innerHTML = `
+                <div class="content">${data.message_html}</div>
+                <br>
+            `;
+            document.querySelector('#chat-box').appendChild(messageElement);
+        }).catch((error) => {
+            console.error('Error:', error);
+        });
+});
+
+
+
+
+  </script>
+</html>
