@@ -7,7 +7,7 @@ import markdown
 
 def run_llm(chat_history, context):
     # Or use `` to fetch an environment variable.
-    GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY', "get_one_from_google"
+    GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY', "get_one_from_google")
 
     genai.configure(api_key=GOOGLE_API_KEY)
 
