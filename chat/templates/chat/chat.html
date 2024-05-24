@@ -122,6 +122,23 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/markdown.js/0.5.0/markdown.min.js" integrity="sha512-kaDP6dcDG3+X87m9SnhyJzwBMKrYnd2tLJjGdBrZ9yEL8Zcl2iJRsPwylLkbd2g3QC5S8efV3sgwI5r73U0HnA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 <!--      on submit press, we need to send a payload with the message and context to chat/update/chat_id-->
+
+const textareaElement = document.querySelector('textarea[name="message"]');
+textareaElement.addEventListener('keydown',enterKeyHandle);
+
+function enterKeyHandle(event) {
+  if (event.key === 'Enter' && !event.shiftKey) {
+    event.preventDefault();
+
+    const message = event.target.value.trim();
+    if (message) {
+      document.querySelector('button').click();
+
+      event.target.value = '';
+    }
+  }
+}
+
 document.querySelector('button').addEventListener('click', function() {
     const message = document.querySelector('textarea[name="message"]').value;
     const context = document.querySelector('.context textarea').value;
