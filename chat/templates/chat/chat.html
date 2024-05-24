@@ -163,14 +163,12 @@ document.querySelector('button').addEventListener('click', function() {
         .then((data) => {
             console.log(data);
             <!--      on success, we need to append the message to the chat-box-->
-
-                let md = markdown.toHTML(data.message_html);
                 const responseElement = document.createElement('div');
                 responseElement.classList.add('message');
                 responseElement.innerHTML = `
                 <div class="message">
                         <div class="author">model</div>
-                        <div class="content">${md}</div>
+                        <div class="content">${data.message_html}</div>
                 </div>
                 <br>
             `;
