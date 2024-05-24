@@ -32,10 +32,13 @@ class ChatDetailView(DetailView):
   def get_context_data(self, **kwargs):
     context = super().get_context_data(**kwargs)
     history = context["chat"].history
-    size_count_tokens = count_tokens(history)
+   
+    size_count_tokens = 0
 
-    if history:
+    if history: 
+      size_count_tokens = count_tokens(history)
       history = json.loads(history)
+
       for his in history:
         his["parts"] = "<br>".join([to_markdown(part) for part in his.get("parts", [])])
 
