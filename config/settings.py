@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 from dotenv import load_dotenv
+import os
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -48,7 +49,9 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     'rest_framework',
+    'algoliasearch_django',
     *LOCAL_APPS,
+
 ]
 
 MIDDLEWARE = [
@@ -137,4 +140,10 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10
+}
+#Algolia
+ALGOLIA = {
+  'APPLICATION_ID': os.getenv('ALGOLIA_APPLICATION'),
+  'API_KEY': os.getenv('ALGOLIA_API_KEY'),
+  'ALGOLIA_UI': os.getenv('ALGOLIA_UI'), 
 }

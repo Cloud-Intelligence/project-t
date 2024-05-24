@@ -2,5 +2,6 @@ google-generativeai
 django
 django-rest-framework
 pygments
-markddown
 python-dotenv
+markdown
+algoliasearch-django>=3.0,<4.0

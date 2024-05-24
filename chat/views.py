@@ -6,12 +6,19 @@ from django.shortcuts import redirect
 
 from .models import Chat
 from .utils import to_markdown, count_tokens
+from django.conf import settings
+
 
 
 class ChatListView(ListView):
   model = Chat
   template_name = "chat/list.html"
   context_object_name = "chats"  # Optional customization
+  def get_context_data(self, **kwargs):
+    context = super().get_context_data(**kwargs)
+    context["algolia_app_code"]=settings.ALGOLIA["APPLICATION_ID"]
+    context["algolia_ui"]=settings.ALGOLIA["ALGOLIA_UI"]
+    return context
   #
   # def get_queryset(self):  # Optional to filter or modify queryset
   #   return Chat.objects.all().order_by('-created_date')
