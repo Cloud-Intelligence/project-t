@@ -2,3 +2,5 @@ google-generativeai
 django
 django-rest-framework
 pygments
+markddown
+python-dotenv
