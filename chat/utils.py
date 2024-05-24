@@ -13,7 +13,12 @@ def run_llm(chat_history, context):
 
     model = genai.GenerativeModel('gemini-1.5-pro')
     context_message = {"role": "user", "parts": [context]}
+
     messages = [context_message, *chat_history]
+
+    # check the number of tokens
+    # if too big, new message = context + [history (minus first message)] (keep checking until under a milly)
+    # in the future we want to mark some messages as no delete
 
     response = model.generate_content(messages)
     token_count = model.count_tokens(messages)
