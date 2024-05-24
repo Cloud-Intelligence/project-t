@@ -102,7 +102,7 @@
       <textarea cols="100" rows="1">{% if chat.context %}{{ chat.context }}{% endif %}</textarea>
   </div>
   <div id="chat-box">
-      <div class="heading">HISTORY (CTX:900/2000 [40%])</div>
+      <div class="heading">HISTORY (CTX:{{ size_count }}/1 000 000 [{{ size_count_percentage }}%])</div>
       <br><br>
       {% for message in chat.history %}
       <div class="message">
@@ -179,9 +179,5 @@ document.querySelector('button').addEventListener('click', function() {
             console.error('Error:', error);
         });
 });
-
-
-
-
   </script>
 </html>
