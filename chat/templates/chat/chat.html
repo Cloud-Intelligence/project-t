@@ -4,9 +4,99 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Simple Chat App</title>
+    <style>
+        body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern font */
+  margin: 0; /* Eliminate default margins */
+  background-color: darkgrey; /* Subtle background */
+  display: grid; /* Use grid layout for better control */
+    grid-template-rows: auto 1fr auto; /* Three rows: header, content, input */
+    min-height: 100vh;
+}
+
+.heading {
+  padding: 15px;
+  background-color: rebeccapurple; /* Eye-catching header color */
+  color: white;
+  margin: 0; /* No margin to fit top of screen */
+}
+
+.context {
+  background-color: #ecf0f1; /* Soft container background */
+  padding: 10px;
+  overflow-y: auto; /* Add scrollbar if context overflows */
+  position: sticky;
+  width: 100%;
+  top: 0px;
+}
+
+.context textarea {
+  width: 90%;
+  resize: vertical; /* Allow resizing only vertically */
+}
+
+#chat-box {
+  flex: 1; /* Make it take up available space */
+  overflow-y: auto; /* Scrollable chat area */
+  padding: 15px;
+  max-height: calc(100vh - 250px);
+  padding-bottom: 20vh;
+}
+
+.heading {
+  text-align: center;
+  color: #7f8c8d; /* Slightly muted heading */
+}
+
+.message {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.author {
+  font-weight: bold;
+  margin-right: 10px; /* Space between author and message */
+  align-self: flex-start; /* Align to the top of the message box */
+}
+
+.content {
+  background-color: white;
+  padding: 10px;
+  border-radius: 8px; /* Rounded corners */
+  max-width: 75%; /* Limit message width */
+  word-break: break-word; /* Wrap long words */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Subtle shadow */
+}
+
+.input-section {
+  background-color: #ecf0f1;
+  padding: 10px;
+  display: flex;
+  position: fixed;
+  bottom: 0;
+    width: 100%;
+
+}
+
+.input-section textarea {
+  flex: 1; /* Make textarea take available space */
+  resize: vertical;
+}
+
+.input-section button {
+  background-color: #2ecc71; /* Green send button */
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  cursor: pointer;
+  border-radius: 5px; /* Slightly rounded button */
+  margin: 0 10px; /* Space between textarea and button */
+}
+
+    </style>
 </head>
 <body>
-  <h1>Chat Room - CHAT ID: {{ chat.pk }}</h1><a href="/chat/">list all</a>
+  <h1 class="heading">Chat Room - CHAT ID: {{ chat.pk }}</h1><a href="/chat/">list all</a>
   <div class="context">
       <p>Set you context here</p>
       <textarea cols="100" rows="1">{% if chat.context %}{{ chat.context }}{% endif %}</textarea>
@@ -29,6 +119,7 @@
     <button type="submit">Send</button>
   </div>
 </body>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/markdown.js/0.5.0/markdown.min.js" integrity="sha512-kaDP6dcDG3+X87m9SnhyJzwBMKrYnd2tLJjGdBrZ9yEL8Zcl2iJRsPwylLkbd2g3QC5S8efV3sgwI5r73U0HnA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script>
 <!--      on submit press, we need to send a payload with the message and context to chat/update/chat_id-->
 document.querySelector('button').addEventListener('click', function() {
@@ -39,13 +130,17 @@ document.querySelector('button').addEventListener('click', function() {
     const messageElement = document.createElement('div');
     messageElement.classList.add('message');
     messageElement.innerHTML = `
-        <div class="content">${message}</div>
+            <div class="author">User</div>
+            <div class="content">${message}</div>
     `;
     document.querySelector('#chat-box').appendChild(messageElement);
 
     const responseElement = document.createElement('div');
     responseElement.classList.add('message');
-    responseElement.innerHTML = '<p>loading llm response...</p>';
+    responseElement.innerHTML = `
+            <div class="author">model</div>
+            <div class="content">Loading...</div>
+    `;
     document.querySelector('#chat-box').appendChild(responseElement);
 
 
@@ -69,14 +164,19 @@ document.querySelector('button').addEventListener('click', function() {
             console.log(data);
             <!--      on success, we need to append the message to the chat-box-->
 
-                const chats = document.querySelector("#chat-box")
-                const lastChild = chats.querySelector(':last-child');
-
-                lastChild.innerHTML = `
-                <div class="content">${data.message_html}</div>
+                let md = markdown.toHTML(data.message_html);
+                const responseElement = document.createElement('div');
+                responseElement.classList.add('message');
+                responseElement.innerHTML = `
+                <div class="message">
+                        <div class="author">model</div>
+                        <div class="content">${md}</div>
+                </div>
                 <br>
             `;
-            document.querySelector('#chat-box').appendChild(messageElement);
+            const parentElement = document.querySelector('#chat-box');
+            parentElement.removeChild(parentElement.lastChild);
+            parentElement.appendChild(responseElement);
         }).catch((error) => {
             console.error('Error:', error);
         });

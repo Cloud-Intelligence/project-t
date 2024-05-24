@@ -23,5 +23,8 @@ def run_llm(chat_history, context):
 
 def to_markdown(text):
   text = text.replace('•', '  *')
-  text = text.replace('\n', '<br>')
-  return markdown.markdown(textwrap.indent(text, '> ', predicate=lambda _: True))
+  # text = text.replace('\n', '<br>')
+  wrapped = textwrap.indent(text, '> ', predicate=lambda _: True)
+  html = markdown.markdown(wrapped, extensions=['fenced_code', 'codehilite', 'tables'])
+  print(html)
+  return html

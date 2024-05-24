@@ -1,3 +1,4 @@
 google-generativeai
 django
 django-rest-framework
+pygments
