@@ -112,6 +112,7 @@ body {
   box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Subtle shadow */
   color: white;
 }
+.error { background: red; }
 
 .input-section {
   background-color: #222222;
@@ -226,6 +227,7 @@ document.querySelector('button').addEventListener('click', function() {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
         },
         body: JSON.stringify({
             message,
@@ -258,6 +260,22 @@ document.querySelector('button').addEventListener('click', function() {
             document.getElementById('chat-name').innerText = data.chat_name;
         }).catch((error) => {
             console.error('Error:', error);
+
+            const responseElement = document.createElement('div');
+                responseElement.classList.add('message');
+                responseElement.classList.add('model-response');
+                responseElement.innerHTML = `
+                <div class="message">
+                        <div class="author">model</div>
+                        <div class="message-content error">RESPONSE FAIL: ${error}</div>
+                </div>
+                <br>
+            `;
+            const parentElement = document.querySelector('#chat-box');
+            parentElement.removeChild(parentElement.lastChild);
+            parentElement.appendChild(responseElement);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
         });
 });
 })();

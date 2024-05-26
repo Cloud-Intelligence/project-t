@@ -11,17 +11,25 @@ def run_llm(chat_history, context):
     GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY', "get_one_from_google")
 
     genai.configure(api_key=GOOGLE_API_KEY)
+    models = ["gemini-1.5-flash-latest", 'gemini-1.5-pro']
+    model = genai.GenerativeModel(models[0], system_instruction=context)
 
-    model = genai.GenerativeModel('gemini-1.5-pro')
-    context_message = {"role": "user", "parts": [context]}
-
-    messages = [context_message, *chat_history]
+    # TODO: need to check if the chat history is too long and make it shorter
+    messages = [*chat_history]
 
     # check the number of tokens
-    # if too big, new message = context + [history (minus first message)] (keep checking until under a milly)
+    # if too big, new message = [history (minus first message)] (keep checking until under a milly)
     # in the future we want to mark some messages as no delete
 
-    response = model.generate_content(messages)
+    response = model.generate_content(
+        messages,
+        safety_settings={
+            'HATE': 'BLOCK_NONE',
+            'HARASSMENT': 'BLOCK_NONE',
+            'SEXUAL': 'BLOCK_NONE',
+            'DANGEROUS': 'BLOCK_NONE'
+        }
+    )
     token_count = model.count_tokens(messages)
     print(token_count)
 
@@ -31,9 +39,7 @@ def run_llm(chat_history, context):
 def to_markdown(text):
   text = text.replace('•', '  *')
   wrapped = textwrap.indent(text, '> ', predicate=lambda _: True)
-  print(wrapped)
   html = markdown.markdown(wrapped, extensions=['pymdownx.superfences', 'codehilite', 'pymdownx.highlight', 'pymdownx.magiclink', 'pymdownx.emoji', 'pymdownx.details', 'tables'])
-  print(html)
   return html
 
 

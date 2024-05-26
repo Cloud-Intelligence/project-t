@@ -3,7 +3,7 @@ import json
 from rest_framework import permissions, viewsets
 from rest_framework.response import Response
 
-from chat.models import Chat
+from chat.models import Chat, Message
 from chat.serializers import ChatSerializer
 from .utils import run_llm, to_markdown
 
@@ -23,26 +23,20 @@ class ChatViewSet(viewsets.GenericViewSet):
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         message = request.data.get("message")
-        history = json.loads(instance.history if instance.history else "[]")
-
-        print(f"Got new message: {message}")
-        history.append({"role": "user", "parts": [message]})
-        instance.history = json.dumps(history)
-
         context = request.data.get("context", instance.context)
 
+        # Update name if new context
         if instance.context != context:
             print(f"Found new context: {context}")
             summary = _build_summary(context)
             instance.name = summary
-
         instance.context = context
 
-        llm_result = call_llm(history, context)
-        print(f"LLM Result: {llm_result}")
+        # call the LLM model
+        llm_result = call_llm(instance, message)
+        Message.objects.create(chat=instance, role="user", parts=message)
+        Message.objects.create(chat=instance, role="model", parts=llm_result)
 
-        history.append({"role": "model", "parts": [llm_result]})
-        instance.history = json.dumps(history)
         instance.save()
 
         return Response({"message_html": to_markdown(llm_result), "chat_name": instance.name})
@@ -61,6 +55,11 @@ def _build_summary(context):
     return summary
 
 
-def call_llm(message_history, context):
+def call_llm(instance, message):
+    message_history = Message.objects.filter(chat=instance).order_by("-created_at")
+    message_history = [{"role": message.role, "parts": [message.parts]} for message in message_history]
+    context = instance.context
+    message_history.append({"role": "user", "parts": [message]})
+
     llm_result = run_llm(message_history, context)
     return llm_result
