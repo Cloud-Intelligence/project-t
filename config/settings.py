@@ -49,10 +49,11 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     'rest_framework',
-    'algoliasearch_django',
     *LOCAL_APPS,
-
 ]
+
+if not DEBUG:
+    INSTALLED_APPS.append('algoliasearch_django')
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",

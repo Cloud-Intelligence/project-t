@@ -3,37 +3,80 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simple Chat App</title>
-    <style>
-        body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Modern font */
-  margin: 0; /* Eliminate default margins */
-  background-color: darkgrey; /* Subtle background */
-  display: grid; /* Use grid layout for better control */
-    grid-template-rows: auto 1fr auto; /* Three rows: header, content, input */
-    min-height: 100vh;
-}
-
-.heading {
-  padding: 15px;
-  background-color: rebeccapurple; /* Eye-catching header color */
-  color: white;
-  margin: 0; /* No margin to fit top of screen */
+  <title>Better Bard</title>
+<link rel="stylesheet" href="https://rawgit.com/richleland/pygments-css/master/native.css">
+<style>
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin: 0;
+  background-color: #181818;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  min-height: 100vh;
+  width: 100vw;
+  overflow: hidden;
 }
 
 .context {
-  background-color: #ecf0f1; /* Soft container background */
-  padding: 10px;
-  overflow-y: auto; /* Add scrollbar if context overflows */
-  position: sticky;
-  width: 100%;
+  background-color: #000000;
   top: 0px;
+  display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
 }
 
 .context textarea {
-  width: 90%;
-  resize: vertical; /* Allow resizing only vertically */
+  width: 95%;
+  resize: vertical;
+  margin-bottom: 15px;
+  color: white;
+  background-color: #222222;
 }
+
+.heading {
+  margin: 0;
+  display: flex;
+  width: 100%;
+  justify-content: space-between;
+}
+
+.heading h1, .heading p {
+  color: #2ecc71;
+  margin: 0;
+  padding: 5px;
+  font-size: 24px;
+  align-self: center;
+}
+
+.heading p {
+  font-size: 18px;
+  color: darkgrey;
+}
+
+
+.summary-text {
+  color: #2ecc71;
+  cursor: pointer;
+  margin: 0;
+  padding: 5px;
+  font-size: 18px;
+}
+
+.heading a {
+  color: #3498db;
+  text-decoration: none;
+  padding: 2px;
+  font-size: 24px;
+}
+
+.highlight {
+  padding: 2px 20px;
+  background: #353434;
+  border-radius: 5px;
+}
+
+
 
 #chat-box {
   flex: 1; /* Make it take up available space */
@@ -43,44 +86,56 @@
   padding-bottom: 20vh;
 }
 
-.heading {
-  text-align: center;
-  color: #7f8c8d; /* Slightly muted heading */
-}
 
 .message {
+<!--  width: 60vw;-->
   display: flex;
   margin-bottom: 10px;
+  background-color: #222222;
 }
 
 .author {
   font-weight: bold;
+  color: #3498db;
   margin-right: 10px; /* Space between author and message */
   align-self: flex-start; /* Align to the top of the message box */
+  position: relative;
+  top: 10px;
+  left: 10px;
 }
 
-.content {
-  background-color: white;
+.message-content {
   padding: 10px;
   border-radius: 8px; /* Rounded corners */
   max-width: 75%; /* Limit message width */
   word-break: break-word; /* Wrap long words */
   box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Subtle shadow */
+  color: white;
 }
 
 .input-section {
-  background-color: #ecf0f1;
-  padding: 10px;
+  background-color: #222222;
   display: flex;
   position: fixed;
   bottom: 0;
-    width: 100%;
-
+  left: 0;
+  width: 100vw;
+  height: 70px;
 }
 
 .input-section textarea {
   flex: 1; /* Make textarea take available space */
   resize: vertical;
+  margin: 15px;
+  margin-right: 0;
+  background: #353434;
+  outline: none;
+    border: none;
+color: white;
+  font-size: 16px;
+  padding: 10px;
+  border-radius: 5px; /* Slightly rounded corners */
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* Subtle shadow */
 }
 
 .input-section button {
@@ -90,38 +145,42 @@
   padding: 10px 15px;
   cursor: pointer;
   border-radius: 5px; /* Slightly rounded button */
-  margin: 0 10px; /* Space between textarea and button */
+  margin: 15px 10px; /* Space between textarea and button */
 }
 
-    </style>
+</style>
 </head>
 <body>
-  <h1 class="heading">Chat Room - CHAT ID: {{ chat.pk }}</h1><a href="/chat/">list all</a>
   <div class="context">
-      <p>Set you context here</p>
-      <textarea cols="100" rows="1">{% if chat.context %}{{ chat.context }}{% endif %}</textarea>
+      <div class="heading">
+          <a href="/chat/"><h1 id="chat-name">> [{{ chat.pk }}] {{ chat.name }}</h1></a>
+          <p><sup>{{ size_count }}</sup>&frasl;<sub>1 000 000</sub> [{{ size_count_percentage }}%]</p>
+      </div>
+      <details>
+          <summary class="summary-text">Set Context</summary>
+          <textarea cols="100" rows="3">{% if chat.context %}{{ chat.context }}{% endif %}</textarea>
+    </details>
   </div>
   <div id="chat-box">
-      <div class="heading">HISTORY (CTX:{{ size_count }}/1 000 000 [{{ size_count_percentage }}%])</div>
-      <br><br>
       {% for message in chat.history %}
       <div class="message">
           {% autoescape off %}
-            <div class="author">{{message.role }}</div>
-            <div class="content">{{message.parts}}</div>
+            <div class="author">{% if message.role == 'user' %} Prompt {% else %} Model Result {% endif %}</div>
+            <div class="message-content">{{message.parts}}</div>
           {% endautoescape %}
         </div>
       <br>
       {% endfor %}
   </div>
+  <div class="content"></div>
   <div class="input-section">
     <textarea name="message" cols="100" rows="1"></textarea>
     <button type="submit">Send</button>
   </div>
 </body>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/markdown.js/0.5.0/markdown.min.js" integrity="sha512-kaDP6dcDG3+X87m9SnhyJzwBMKrYnd2tLJjGdBrZ9yEL8Zcl2iJRsPwylLkbd2g3QC5S8efV3sgwI5r73U0HnA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
 <script>
-<!--      on submit press, we need to send a payload with the message and context to chat/update/chat_id-->
+(function() {
 
 const textareaElement = document.querySelector('textarea[name="message"]');
 textareaElement.addEventListener('keydown',enterKeyHandle);
@@ -142,24 +201,26 @@ function enterKeyHandle(event) {
 document.querySelector('button').addEventListener('click', function() {
     const message = document.querySelector('textarea[name="message"]').value;
     const context = document.querySelector('.context textarea').value;
+    const chatBox = document.querySelector('#chat-box');
 
     document.querySelector('textarea[name="message"]').value = '';
     const messageElement = document.createElement('div');
     messageElement.classList.add('message');
     messageElement.innerHTML = `
             <div class="author">User</div>
-            <div class="content">${message}</div>
+            <div class="message-content">${message}</div>
     `;
-    document.querySelector('#chat-box').appendChild(messageElement);
+    chatBox.appendChild(messageElement);
 
     const responseElement = document.createElement('div');
     responseElement.classList.add('message');
+    responseElement.classList.add('model-response');
     responseElement.innerHTML = `
             <div class="author">model</div>
-            <div class="content">Loading...</div>
+            <div class="message-content">Loading...</div>
     `;
-    document.querySelector('#chat-box').appendChild(responseElement);
-
+    chatBox.appendChild(responseElement);
+    chatBox.scrollTop = chatBox.scrollHeight;
 
     fetch('/api/chat/{{chat.pk}}/', {
         method: 'PUT',
@@ -179,22 +240,26 @@ document.querySelector('button').addEventListener('click', function() {
         })
         .then((data) => {
             console.log(data);
-            <!--      on success, we need to append the message to the chat-box-->
                 const responseElement = document.createElement('div');
                 responseElement.classList.add('message');
+                responseElement.classList.add('model-response');
                 responseElement.innerHTML = `
                 <div class="message">
                         <div class="author">model</div>
-                        <div class="content">${data.message_html}</div>
+                        <div class="message-content">${data.message_html}</div>
                 </div>
                 <br>
             `;
             const parentElement = document.querySelector('#chat-box');
             parentElement.removeChild(parentElement.lastChild);
             parentElement.appendChild(responseElement);
+            chatBox.scrollTop = chatBox.scrollHeight;
+
+            document.getElementById('chat-name').innerText = data.chat_name;
         }).catch((error) => {
             console.error('Error:', error);
         });
 });
+})();
   </script>
 </html>

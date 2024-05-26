@@ -19,18 +19,15 @@ class ChatListView(ListView):
     context["algolia_app_code"]=settings.ALGOLIA["APPLICATION_ID"]
     context["algolia_ui"]=settings.ALGOLIA["ALGOLIA_UI"]
     return context
-  #
-  # def get_queryset(self):  # Optional to filter or modify queryset
-  #   return Chat.objects.all().order_by('-created_date')
+
+  def get_queryset(self):
+    return Chat.objects.filter(user=self.request.user).order_by('-created_date')
 
 
 class create_chat(View):
   def get(self, request):
-    new_chat = Chat.objects.create()
-    # redirect to details page
+    new_chat = Chat.objects.create(user=request.user, name="New Chat")
     return redirect('chat', pk=new_chat.pk)
-    # return redirect(ChatDetailView, pk=new_chat.pk)
-
 
 class ChatDetailView(DetailView):
   model = Chat
@@ -47,7 +44,7 @@ class ChatDetailView(DetailView):
       history = json.loads(history)
 
       for his in history:
-        his["parts"] = "<br>".join([to_markdown(part) for part in his.get("parts", [])])
+        his["parts"] = to_markdown("\n\n".join([part for part in his.get("parts", [])]))
 
     print(history)
     context["chat"].history = history
@@ -56,7 +53,7 @@ class ChatDetailView(DetailView):
 
     return context
 
-#
+
 # class ChatView(View):
 #     def list(self, request):
 #         return render(request, "chat/list.html")

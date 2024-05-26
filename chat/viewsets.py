@@ -30,7 +30,13 @@ class ChatViewSet(viewsets.GenericViewSet):
         instance.history = json.dumps(history)
 
         context = request.data.get("context", instance.context)
-        instance.context = request.data.get("context", instance.context)
+
+        if instance.context != context:
+            print(f"Found new context: {context}")
+            summary = _build_summary(context)
+            instance.name = summary
+
+        instance.context = context
 
         llm_result = call_llm(history, context)
         print(f"LLM Result: {llm_result}")
@@ -39,7 +45,20 @@ class ChatViewSet(viewsets.GenericViewSet):
         instance.history = json.dumps(history)
         instance.save()
 
-        return Response({"message_html": to_markdown(llm_result)})
+        return Response({"message_html": to_markdown(llm_result), "chat_name": instance.name})
+
+
+def _build_summary(context):
+    mes_history = [{"role": "user", "parts": [context]}]
+    ctx = """
+    The following message will be a context for an llm chatbot, 
+    summarize the context into as few a words as possible so that we can create a title for the chat. 
+    do not respond to the message, just summarize it into a title.
+    do not respond with more than 5 words.
+    """
+
+    summary = run_llm(mes_history, ctx)
+    return summary
 
 
 def call_llm(message_history, context):

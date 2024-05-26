@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Simple Chat App</title>
+  <title>Better Bard</title>
 </head>
 <body>
   <div class="ais-InstantSearch">
@@ -11,7 +11,7 @@
     <ul id="search-results"></ul>
   </div>
 {% for chat in chats %}
-<a href="/chat/{{chat.pk}}"><h1>Chat Room - CHAT ID: {{ chat.pk }}</h1></a>
+<a href="/chat/{{chat.pk}}"><h1>{{ chat.pk }} -- {{ chat.name }} -- {{ chat.created_date }}</h1></a>
 {% endfor %}
   <a href="/chat/new">Create New</a>
   <script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.23.3/dist/algoliasearch-lite.umd.js" integrity="sha256-1QNshz86RqXe/qsCBldsUu13eAX6n/O98uubKQs87UI=" crossorigin="anonymous"></script>
@@ -35,7 +35,7 @@ searchInput.addEventListener('input', () => {
             searchResults.innerHTML = hits.map(hit => `
                 <li>
                     <a href="/chat/${hit.objectID}"><h3>${hit.context}</h3></a>
-                    <p>${hit.history}</p>
+                    <p>${hit.name}</p>
                 </li>
             `).join('');
         });
