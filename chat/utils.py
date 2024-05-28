@@ -16,6 +16,7 @@ def run_llm(chat_history, context):
 
     # TODO: need to check if the chat history is too long and make it shorter
     messages = [*chat_history]
+    token_count = model.count_tokens(messages)
 
     # check the number of tokens
     # if too big, new message = [history (minus first message)] (keep checking until under a milly)
@@ -30,8 +31,6 @@ def run_llm(chat_history, context):
             'DANGEROUS': 'BLOCK_NONE'
         }
     )
-    token_count = model.count_tokens(messages)
-    print(token_count)
 
     return response.text
 

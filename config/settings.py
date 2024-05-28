@@ -52,7 +52,8 @@ INSTALLED_APPS = [
     *LOCAL_APPS,
 ]
 
-if not DEBUG:
+SEARCH_ENABLED = os.getenv('SEARCH_ENABLED', False)
+if not SEARCH_ENABLED:
     INSTALLED_APPS.append('algoliasearch_django')
 
 MIDDLEWARE = [
@@ -70,7 +71,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -115,6 +116,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+LOGIN_REDIRECT_URL = '/'
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/

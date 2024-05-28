@@ -22,6 +22,7 @@ from homepage import urls as homepage_urls
 from chat import urls as chat_urls
 from chat.viewsets import ChatViewSet
 
+
 router = routers.DefaultRouter()
 router.register(r'chat', ChatViewSet)
 
@@ -30,4 +31,5 @@ urlpatterns = [
     path("", include(homepage_urls)),
     path("chat/", include(chat_urls)),
     path('api/', include(router.urls)),
+    path('accounts/', include('django.contrib.auth.urls')),
 ]

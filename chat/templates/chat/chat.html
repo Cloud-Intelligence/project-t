@@ -19,7 +19,10 @@ body {
 
 .context {
   background-color: #000000;
+  position: fixed;
   top: 0px;
+  left: 0px;
+  width: 100vw;
   display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -76,16 +79,14 @@ body {
   border-radius: 5px;
 }
 
-
-
 #chat-box {
+  margin-top: 70px;
   flex: 1; /* Make it take up available space */
   overflow-y: auto; /* Scrollable chat area */
   padding: 15px;
   max-height: calc(100vh - 250px);
   padding-bottom: 20vh;
 }
-
 
 .message {
 <!--  width: 60vw;-->
@@ -278,6 +279,8 @@ document.querySelector('button').addEventListener('click', function() {
 
         });
 });
+const chatBox = document.querySelector('#chat-box');
+chatBox.scrollTop = chatBox.scrollHeight;
 })();
   </script>
 </html>

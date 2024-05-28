@@ -2,6 +2,7 @@ import json
 
 from rest_framework import permissions, viewsets
 from rest_framework.response import Response
+from rest_framework import permissions
 
 from chat.models import Chat, Message
 from chat.serializers import ChatSerializer
@@ -14,7 +15,7 @@ class ChatViewSet(viewsets.GenericViewSet):
     """
     queryset = Chat.objects.all().order_by('-created_date')
     serializer_class = ChatSerializer
-    # permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
         return self.queryset.all().order_by('-created_date')
