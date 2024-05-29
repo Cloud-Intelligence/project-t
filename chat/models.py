@@ -17,4 +17,7 @@ class Message(models.Model):
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
     role = models.CharField(max_length=55)
     parts = models.TextField()
+    starred = models.BooleanField(default=False)
+    deleted = models.BooleanField(default=False)
+    tokens = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)

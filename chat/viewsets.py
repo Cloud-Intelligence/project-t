@@ -3,6 +3,7 @@ import json
 from rest_framework import permissions, viewsets
 from rest_framework.response import Response
 from rest_framework import permissions
+from rest_framework.decorators import action
 
 from chat.models import Chat, Message
 from chat.serializers import ChatSerializer
@@ -20,8 +21,8 @@ class ChatViewSet(viewsets.GenericViewSet):
     def get_queryset(self):
         return self.queryset.all().order_by('-created_date')
 
-    # @action(detail=True, methods=['post'])
     def update(self, request, *args, **kwargs):
+        # TODO: Check current user or admin
         instance = self.get_object()
         message = request.data.get("message")
         context = request.data.get("context", instance.context)
@@ -34,6 +35,7 @@ class ChatViewSet(viewsets.GenericViewSet):
         instance.context = context
 
         # call the LLM model
+        # TODO: need to save the token count to the message object
         llm_result = call_llm(instance, message)
         Message.objects.create(chat=instance, role="user", parts=message)
         Message.objects.create(chat=instance, role="model", parts=llm_result)
@@ -41,6 +43,23 @@ class ChatViewSet(viewsets.GenericViewSet):
         instance.save()
 
         return Response({"message_html": to_markdown(llm_result), "chat_name": instance.name})
+
+    @action(detail=True, methods=['DELETE'], url_path='delete-message/(?P<msg_id>[0-9]+)', url_name='delete-message')
+    def delete_message(self, request, pk=None, msg_id=None):
+        # TODO: Check current user or admin
+        message = Message.objects.get(pk=msg_id)
+        message.deleted = True
+        message.save()
+        return Response({"message": "Message deleted"})
+
+    @action(detail=True, methods=['PUT'], url_path='star-message/(?P<msg_id>[0-9]+)', url_name='star-message')
+    def star_message(self, request, pk=None, msg_id=None):
+        # TODO: Check current user or admin
+        print(f"Star message: {msg_id}, chat_id {pk}")
+        message = Message.objects.get(pk=msg_id)
+        message.starred = not message.starred
+        message.save()
+        return Response({"message": f"Message starred: {message.starred}"})
 
 
 def _build_summary(context):
@@ -60,7 +79,10 @@ def call_llm(instance, message):
     message_history = Message.objects.filter(chat=instance).order_by("-created_at")
     message_history = [{"role": message.role, "parts": [message.parts]} for message in message_history]
     context = instance.context
+
+    # todo: get size of tokens here and add to object
     message_history.append({"role": "user", "parts": [message]})
 
+    # todo: get token size of result to add to object
     llm_result = run_llm(message_history, context)
     return llm_result

@@ -150,6 +150,28 @@ color: white;
   margin: 15px 10px; /* Space between textarea and button */
 }
 
+pre {
+  position: relative;
+}
+
+.copy-button {
+  position: absolute;
+  top: -5px;
+  right: -5px;
+  background-color: #eee;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: #0f0f0f;
+  color: white;
+}
+
+.copy-button:hover {
+  background-color: #1f1f1f;
+}
+
+
 </style>
 </head>
 <body>
@@ -165,8 +187,10 @@ color: white;
   </div>
   <div id="chat-box">
       {% for message in chat.history %}
-      <div class="message">
-          {% autoescape off %}
+      <div class="message" data-id="{{message.pk}}">
+          <button onclick="deleteMessage({{message.pk}})">Delete</button>
+          <button onclick="starMessage({{message.pk}})" class="star-button" data-id="star-{{message.pk}}">{% if message.starred %} unkeep {% else %} keep {% endif %}</button>
+        {% autoescape off %}
             <div class="author">{% if message.role == 'user' %} Prompt {% else %} Model Result {% endif %}</div>
             <div class="message-content">{{message.parts}}</div>
           {% endautoescape %}
@@ -176,31 +200,110 @@ color: white;
   </div>
   <div class="content"></div>
   <div class="input-section">
-    <textarea name="message" cols="100" rows="1"></textarea>
-    <button type="submit">Send</button>
+    <textarea id="message-box" name="message" cols="100" rows="1"></textarea>
+    <button id="submit-message" type="submit">Send</button>
   </div>
+
+
 </body>
 
 <script>
+function deleteMessage(messageID) {
+    const message = document.querySelector(`.message[data-id="${messageID}"]`);
+    message.remove();
+    const url = `/api/chat/{{chat.pk}}/delete-message/${messageID}`
+    const opts = {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+        }
+    fetch(url, opts).then((response) => {
+        if (!response.ok) {
+            throw new Error(`Network response was not ok status: ${response.status}`);
+        }
+        return response.json()
+        })
+        .then((data) => {
+            console.log(data);
+        }).catch((error) => {
+            console.error('Error:', error);
+        });
+};
+
+function starMessage(messageID) {
+    const selector = `.star-button[data-id="star-${messageID}"]`
+    const message = document.querySelector(selector);
+    message.textContent = 'unkeep';
+
+    const url = `/api/chat/{{chat.pk}}/star-message/${messageID}/`;
+    console.log(url);
+
+    const opts = {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+        }
+    fetch(url, opts).then((response) => {
+        if (!response.ok) {
+            throw new Error(`Network response was not ok status: ${response.status}`);
+        }
+        return response.json()
+        })
+        .then((data) => {
+            console.log(data);
+        }).catch((error) => {
+            console.error('Error:', error);
+        });
+};
+
 (function() {
-
-const textareaElement = document.querySelector('textarea[name="message"]');
-textareaElement.addEventListener('keydown',enterKeyHandle);
-
 function enterKeyHandle(event) {
   if (event.key === 'Enter' && !event.shiftKey) {
     event.preventDefault();
 
     const message = event.target.value.trim();
     if (message) {
-      document.querySelector('button').click();
+      document.querySelector('#submit-message').click();
 
       event.target.value = '';
     }
   }
 }
 
-document.querySelector('button').addEventListener('click', function() {
+function copyCode(button) {
+  const codeBlock = button.closest('pre');
+  const code = codeBlock.querySelector('code').textContent;
+
+  navigator.clipboard.writeText(code)
+    .then(() => {
+      button.textContent = 'Copied!';
+      setTimeout(() => button.textContent = '📑', 1500);
+    })
+    .catch(err => {
+      console.error('Failed to copy: ', err);
+    });
+}
+
+function addCopyButton() {
+  const codeBlocks = document.querySelectorAll('pre');
+  codeBlocks.forEach(codeBlock => {
+    // Check if a button with class 'copy-button' already exists within the code block
+    if (!codeBlock.querySelector('.copy-button')) {
+      const copyButton = document.createElement('button');
+      copyButton.textContent = '📑';
+      copyButton.classList.add('copy-button');
+      copyButton.addEventListener('click', () => copyCode(copyButton));
+      codeBlock.appendChild(copyButton);
+    }
+  });
+}
+
+
+function handleMessageSubmit(event) {
     const message = document.querySelector('textarea[name="message"]').value;
     const context = document.querySelector('.context textarea').value;
     const chatBox = document.querySelector('#chat-box');
@@ -259,6 +362,7 @@ document.querySelector('button').addEventListener('click', function() {
             chatBox.scrollTop = chatBox.scrollHeight;
 
             document.getElementById('chat-name').innerText = data.chat_name;
+            addCopyButton();
         }).catch((error) => {
             console.error('Error:', error);
 
@@ -278,9 +382,16 @@ document.querySelector('button').addEventListener('click', function() {
             chatBox.scrollTop = chatBox.scrollHeight;
 
         });
-});
+};
+
+const textareaElement = document.querySelector('#message-box');
+textareaElement.addEventListener('keydown', enterKeyHandle);
+
+document.querySelector('#submit-message').addEventListener('click', handleMessageSubmit);
 const chatBox = document.querySelector('#chat-box');
 chatBox.scrollTop = chatBox.scrollHeight;
+
+addCopyButton();
 })();
   </script>
 </html>

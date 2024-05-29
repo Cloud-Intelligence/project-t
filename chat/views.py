@@ -34,16 +34,17 @@ class create_chat(LoginRequiredMixin, View):
 class ChatDetailView(LoginRequiredMixin, DetailView):
   model = Chat
   template_name = "chat/chat.html"
+  # TODO: Check current user or admin
 
   def get_context_data(self, **kwargs):
     context = super().get_context_data(**kwargs)
-    history = Message.objects.filter(chat=context["chat"]).order_by("created_at")
-    history = [{"role": his.role, "parts": [his.parts]} for his in history]
+    history = Message.objects.filter(chat=context["chat"], deleted=False).order_by("created_at")
+    history = [{"role": his.role, "parts": [his.parts], "pk": his.pk, "starred": his.starred, "tokens": his.tokens} for his in history]
 
     size_count_tokens = 0
 
     if history: 
-      size_count_tokens = count_tokens(history)
+      size_count_tokens = sum([his["tokens"] for his in history])
 
       for his in history:
         his["parts"] = to_markdown("\n\n".join([part for part in his.get("parts", [])]))
