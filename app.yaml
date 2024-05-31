@@ -1,0 +1,22 @@
+runtime: python39  # Use a supported Python version
+entrypoint: gunicorn -b :$PORT config.wsgi:application # Start Gunicorn server
+
+env_variables:
+  DJANGO_SETTINGS_MODULE: config.settings
+  DB_NAME: django
+  DB_USER: appengine
+  DB_PASSWORD: uL3WWEj7u2D0nS4jOqEcYg
+  DB_HOST: solemn-poodle-1237.jxf.cockroachlabs.cloud
+  DB_PORT: 26257
+  GOOGLE_API_KEY: AIzaSyCSG-ICE2L34QJQC8KgREngDIIMhARxK7Q
+  ALGOLIA_API_KEY: 213ef95a24692aa546fd8382f5146cd8
+  ALGOLIA_APPLICATION: MPS9FCK0QB
+  ALGOLIA_UI: ec8474bfbf63fda012fc90c1ebe64398
+  SEARCH_ENABLED: 1
+
+handlers:
+- url: /static
+  static_dir: static  # Serve static files from 'static' folder
+
+- url: /.*  # Catch-all for other URLs
+  script: auto  # Let App Engine handle Django requests

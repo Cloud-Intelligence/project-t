@@ -31,7 +31,7 @@ SECRET_KEY = "django-insecure-nmfiv)id92%4i+i=3k&=&g^-ycuj5*$gh=m6-ks4w%&(07bux-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -92,8 +92,15 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django_cockroachdb",
+        "NAME": os.getenv('DB_NAME', 'django'),
+        "HOST": os.getenv('DB_HOST', 'db'),
+        "USER": os.getenv('DB_USER', 'postgres'),
+        "PASSWORD": os.getenv('DB_PASSWORD', 'postgres'),
+        "PORT": os.getenv('DB_PORT', '5432'),
+        'OPTIONS': {
+            # 'sslmode': 'verify-full',
+        },
     }
 }
 

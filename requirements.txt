@@ -6,3 +6,6 @@ python-dotenv
 markdown
 algoliasearch-django>=3.0,<4.0
 pymdown-extensions
+gunicorn
+psycopg2-binary
+django-cockroachdb==4.2.*
