@@ -13,6 +13,7 @@ env_variables:
   ALGOLIA_APPLICATION: MPS9FCK0QB
   ALGOLIA_UI: ec8474bfbf63fda012fc90c1ebe64398
   SEARCH_ENABLED: 1
+  DEVELOPMENT_MODE: 0
 
 handlers:
 - url: /static
