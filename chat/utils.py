@@ -5,6 +5,8 @@ import google.generativeai as genai
 
 import markdown
 
+MAX_TOKENS = 128000  # Maximum number of tokens allowed
+
 
 def run_llm(chat_history, context):
     # Or use `` to fetch an environment variable.
@@ -14,13 +16,14 @@ def run_llm(chat_history, context):
     models = ["gemini-1.5-flash-latest", 'gemini-1.5-pro']
     model = genai.GenerativeModel(models[0], system_instruction=context)
 
-    # TODO: need to check if the chat history is too long and make it shorter
     messages = [*chat_history]
     token_count = model.count_tokens(messages)
 
-    # check the number of tokens
-    # if too big, new message = [history (minus first message)] (keep checking until under a milly)
-    # in the future we want to mark some messages as no delete
+    # TODO: in the future we want to mark some messages as no delete
+    # Check the number of tokens and shorten the chat history if necessary
+    while token_count.total_tokens > MAX_TOKENS:
+        messages = messages[1:]  # Remove the oldest message from the history
+        token_count = model.count_tokens(messages)
 
     response = model.generate_content(
         messages,

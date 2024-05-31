@@ -9,6 +9,8 @@ from .models import Chat, Message
 from .utils import to_markdown, count_tokens
 from django.conf import settings
 
+MAX_TOKENS = 128000  # Maximum number of tokens allowed
+
 
 class ChatListView(LoginRequiredMixin, ListView):
   model = Chat
@@ -51,6 +53,6 @@ class ChatDetailView(LoginRequiredMixin, DetailView):
 
     context["chat"].history = history
     context["size_count"] = size_count_tokens
-    context["size_count_percentage"] = (size_count_tokens/1000000)*100
+    context["size_count_percentage"] = (size_count_tokens/MAX_TOKENS)*100
 
     return context
