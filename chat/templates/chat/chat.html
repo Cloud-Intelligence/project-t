@@ -317,6 +317,7 @@ function handleMessageSubmit(event) {
     document.querySelector('textarea[name="message"]').value = '';
     const messageElement = document.createElement('div');
     messageElement.classList.add('message');
+<!--    TODO: Need to get the message id so we can inject the buttons here-->
     messageElement.innerHTML = `
             <div class="author">User</div>
             <div class="message-content">${message}</div>
@@ -357,8 +358,10 @@ function handleMessageSubmit(event) {
                 responseElement.classList.add('model-response');
                 responseElement.innerHTML = `
                 <div class="message">
-                        <div class="author">model</div>
-                        <div class="message-content">${data.message_html}</div>
+                    <button onclick="deleteMessage(${data.message_id})">Delete</button>
+                    <button onclick="starMessage(${data.message_id})" class="star-button" data-id="star-${data.message_id}">keep</button>
+                    <div class="author">model</div>
+                    <div class="message-content">${data.message_html}</div>
                 </div>
                 <br>
             `;

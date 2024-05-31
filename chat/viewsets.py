@@ -38,11 +38,11 @@ class ChatViewSet(viewsets.GenericViewSet):
         # TODO: need to save the token count to the message object
         llm_result = call_llm(instance, message)
         Message.objects.create(chat=instance, role="user", parts=message)
-        Message.objects.create(chat=instance, role="model", parts=llm_result)
+        message = Message.objects.create(chat=instance, role="model", parts=llm_result)
 
         instance.save()
 
-        return Response({"message_html": to_markdown(llm_result), "chat_name": instance.name})
+        return Response({"message_html": to_markdown(llm_result), "chat_name": instance.name, "chat_id": instance.id, "message_id": message.pk})
 
     @action(detail=True, methods=['DELETE'], url_path='delete-message/(?P<msg_id>[0-9]+)', url_name='delete-message')
     def delete_message(self, request, pk=None, msg_id=None):
