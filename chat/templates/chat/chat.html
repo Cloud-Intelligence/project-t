@@ -81,13 +81,17 @@ body {
   border-radius: 5px;
 }
 
-#chat-box {
+.chat-box {
   margin-top: 70px;
   flex: 1; /* Make it take up available space */
   overflow-y: auto; /* Scrollable chat area */
   padding: 15px;
   max-height: calc(100vh - 250px);
   padding-bottom: 20vh;
+}
+
+.context-open {
+  margin-top: 150px;
 }
 
 .message {
@@ -187,7 +191,7 @@ pre {
           <textarea cols="100" rows="3">{% if chat.context %}{{ chat.context }}{% endif %}</textarea>
     </details>
   </div>
-  <div id="chat-box">
+  <div id="chat-box" class="chat-box">
       {% for message in chat.history %}
       <div class="message" data-id="{{message.pk}}">
           <button onclick="deleteMessage({{message.pk}})">Delete</button>
@@ -385,6 +389,11 @@ function handleMessageSubmit(event) {
 
         });
 };
+
+document.querySelector('.summary-text').addEventListener('click', function() {
+  const chat = document.querySelector('#chat-box');
+  chat.classList.toggle('context-open');
+});
 
 const textareaElement = document.querySelector('#message-box');
 textareaElement.addEventListener('keydown', enterKeyHandle);
