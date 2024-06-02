@@ -5,6 +5,8 @@ from django.views.generic.detail import DetailView
 from django.shortcuts import redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
+from django.db.models import Q, F
+
 
 from .models import Chat, Message
 from .utils import to_markdown, count_tokens
@@ -18,17 +20,24 @@ class ChatListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['search_query'] = self.request.GET.get('q', '')
+        context['search_query'] = self.request.GET.get('q', '') 
         return context
 
     def get_queryset(self):
         query = self.request.GET.get('q')
         if query:
-            vector = SearchVector('name', 'context')
-            search_query = SearchQuery(query)
-            return Chat.objects.annotate(rank=SearchRank(vector, search_query)).filter(rank__gte=0.001).order_by('-rank')
+            chat_vector = SearchVector('name', 'context')
+            chat_query = SearchQuery(query)
+            
+            message_vector = SearchVector('message__parts')
+            message_query = SearchQuery(query)
+            
+            return Chat.objects.annotate(
+                rank=SearchRank(chat_vector, chat_query) + SearchRank(message_vector, message_query)
+            ).filter(
+                Q(rank__gte=0.001)
+            ).order_by('-rank').distinct()
         return Chat.objects.filter(user=self.request.user).order_by('-created_date')
-
 
 
 class create_chat(LoginRequiredMixin, View):
