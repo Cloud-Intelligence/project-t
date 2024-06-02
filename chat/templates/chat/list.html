@@ -11,8 +11,11 @@
     <button type="submit">Search</button>
   </form>
 
+  {% if search_query %}
+    <p>Results: {{ chats|length }}</p>
+  {% endif %}
+
   {% if chats %}
-    Results: {{ chats|length }}
     <ul>
       {% for chat in chats %}
         <li>

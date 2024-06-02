@@ -18,7 +18,7 @@ class ChatListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['search_query'] = self.request.GET.get('q', '') 
+        context['search_query'] = self.request.GET.get('q', '')
         return context
 
     def get_queryset(self):
@@ -28,6 +28,7 @@ class ChatListView(LoginRequiredMixin, ListView):
             search_query = SearchQuery(query)
             return Chat.objects.annotate(rank=SearchRank(vector, search_query)).filter(rank__gte=0.001).order_by('-rank')
         return Chat.objects.filter(user=self.request.user).order_by('-created_date')
+
 
 
 class create_chat(LoginRequiredMixin, View):
