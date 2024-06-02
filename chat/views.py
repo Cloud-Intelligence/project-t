@@ -17,8 +17,6 @@ class ChatListView(LoginRequiredMixin, ListView):
 
   def get_context_data(self, **kwargs):
     context = super().get_context_data(**kwargs)
-    context["algolia_app_code"]=settings.ALGOLIA["APPLICATION_ID"]
-    context["algolia_ui"]=settings.ALGOLIA["ALGOLIA_UI"]
     return context
 
   def get_queryset(self):
