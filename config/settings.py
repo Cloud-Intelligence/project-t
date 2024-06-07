@@ -163,9 +163,3 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 10
 }
-#Algolia
-ALGOLIA = {
-  'APPLICATION_ID': os.getenv('ALGOLIA_APPLICATION'),
-  'API_KEY': os.getenv('ALGOLIA_API_KEY'),
-  'ALGOLIA_UI': os.getenv('ALGOLIA_UI'), 
-}

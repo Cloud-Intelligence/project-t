@@ -6,41 +6,28 @@
   <title>Better Bard</title>
 </head>
 <body>
-  <div class="ais-InstantSearch">
-    <input type="text" id="search-input" placeholder="Search...">
-    <ul id="search-results"></ul>
-  </div>
-{% for chat in chats %}
-<a href="/chat/{{chat.pk}}"><h1>{{ chat.pk }} -- {{ chat.name }} -- {{ chat.created_date }}</h1></a>
-{% endfor %}
-  <a href="/chat/new">Create New</a>
-  <script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.23.3/dist/algoliasearch-lite.umd.js" integrity="sha256-1QNshz86RqXe/qsCBldsUu13eAX6n/O98uubKQs87UI=" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.69.0/dist/instantsearch.production.min.js" integrity="sha256-kvd6gxFLULpeGloorQu2Cj9XhTFztR1xTHusIyi+cLg=" crossorigin="anonymous"></script>
-<script>
-  (function() {
-  const searchClient = algoliasearch('{{ algolia_app_code }}', '{{ algolia_ui }}');
-  const index = searchClient.initIndex('Chat');
-  const search = instantsearch({
-    indexName: 'Chat',
-    searchClient,
-  });
-  
-const searchInput = document.getElementById('search-input');
-const searchResults = document.getElementById('search-results');
+  <form method="GET" action="">
+    <input type="text" name="q" placeholder="Search..." value="{{ search_query }}">
+    <button type="submit">Search</button>
+  </form>
 
-searchInput.addEventListener('input', () => {
-    index.search(searchInput.value)
-        .then(({ hits }) => {
-          console.log(hits)
-            searchResults.innerHTML = hits.map(hit => `
-                <li>
-                    <a href="/chat/${hit.objectID}"><h3>${hit.context}</h3></a>
-                    <p>${hit.name}</p>
-                </li>
-            `).join('');
-        });
-});
-})();
-  </script>
+  {% if search_query %}
+    <p>Results: {{ chats|length }}</p>
+  {% endif %}
+
+  {% if chats %}
+    <ul>
+      {% for chat in chats %}
+        <li>
+          <a href="/chat/{{ chat.pk }}"><h1>{{ chat.name }} -- {{ chat.created_date }}</h1></a>
+          <p>{{ chat.context }}</p>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p>No results found.</p>
+  {% endif %}
+
+  <a href="/chat/new">Create New Chat</a>
 </body>
 </html>
