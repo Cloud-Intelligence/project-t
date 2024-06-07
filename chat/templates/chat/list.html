@@ -4,128 +4,175 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Better Bard</title>
-</head>
-<style>
-  body {
-    background-color: #0d0d0d;
-    color: #fff;
-    font-family: 'Roboto', sans-serif;
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 20px;
-  }
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      background: #19161c;
+      color: #fff;
+      font-family: 'Courier New', monospace;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+    }
 
-  .container {
-    width: 100%;
-    max-width: 800px;
-  }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
 
-  .search-container {
-    background-color: #1c1c1c;
-    padding: 10px;
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px;
-    border-radius: 4px;
-  }
+    .search-container {
+      position: relative;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      max-width: 300px;
+    }
 
-  #search-input {
-    flex: 1;
-    background-color: #1f1c1c;
-    color: #fff;
-    border: none;
-    padding: 10px;
-    font-size: 16px;
-    border-radius: 4px;
-    outline: none;
-    transition: background-color 0.3s;
-  }
+    .search-icon {
+      color: #b7b7b7;
+      font-size: 26px;
+      cursor: pointer;
+      transition: .2s;
+      z-index: 2;
+      padding: 10px;
+    }
 
-  #search-input::placeholder {
-    color: #50fa7b;
-  }
+    .input {
+      position: absolute;
+      left: 40px;
+      top: 50%;
+      transform: translateY(-50%);
+      padding: 10px;
+      width: 0;
+      background: none;
+      border: 4px solid #fff;
+      border-radius: 50px;
+      box-sizing: border-box;
+      font-family: 'Courier New', monospace;
+      font-size: 18px;
+      color: #b7b7b7;
+      outline: none;
+      transition: .5s;
+      opacity: 0;
+      z-index: 1;
+    }
 
-  #search-input:focus {
-    background-color: #333;
-  }
+    .search-container:hover .input {
+      width: calc(100% - 50px);
+      background: #3b3640;
+      border-radius: 10px;
+      opacity: 1;
+    }
 
-  .chat-list {
-    list-style-type: none;
-    padding: 0;
-    margin: 0;
-  }
+    .tilesWrap {
+      padding: 0;
+      margin: 50px auto;
+      list-style: none;
+      text-align: center;
+    }
 
-  .chat-list li {
-    background-color: #1c1c1c;
-    border-radius: 4px;
-    padding: 12px 20px;
-    margin-bottom: 8px;
-    transition: background-color 0.3s;
-  }
+    .tilesWrap li {
+      display: inline-block;
+      width: 20%;
+      min-width: 200px;
+      max-width: 230px;
+      padding: 80px 20px 40px;
+      position: relative;
+      vertical-align: top;
+      margin: 10px;
+      font-family: 'Courier New', monospace;
+      min-height: 25vh;
+      background: #3b3640;
+      border: 1px solid #252727;
+      text-align: left;
+      transition: all 0.3s ease-in-out;
+    }
 
-  .chat-list li:hover {
-    background-color: #333;
-  }
+    .tilesWrap li h2 {
+      font-size: 114px;
+      margin: 0;
+      position: absolute;
+      opacity: 0.2;
+      top: 50px;
+      right: 10px;
+      transition: all 0.3s ease-in-out;
+    }
 
-  .chat-list li a {
-    text-decoration: none;
-    color: #fff;
-    display: block;
-  }
+    .tilesWrap li h3 {
+      font-size: 20px;
+      color: #b7b7b7;
+      margin-bottom: 5px;
+    }
 
-  .chat-list li h1 {
-    margin: 0;
-    color: #50fa7b;
-    font-size: 18px;
-    font-weight: 500;
-  }
+    .tilesWrap li p {
+      font-size: 16px;
+      line-height: 18px;
+      color: #b7b7b7;
+      margin-top: 5px;
+    }
 
-  .chat-list li .chat-meta {
-    color: #aaa;
-    font-size: 14px;
-    margin-top: 4px;
-  }
+    .tilesWrap li:before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      z-index: -1;
+      background: #fff;
+      transform: skew(2deg, 2deg);
+    }
 
-  .create-new {
-    display: block;
-    margin-top: 20px;
-    text-decoration: none;
-    color: #50fa7b;
-    text-align: center;
-    padding: 10px;
-    border: 2px solid #50fa7b;
-    border-radius: 4px;
-    transition: background-color 0.3s, color 0.3s;
-  }
+    .tilesWrap li:after {
+      content: '';
+      position: absolute;
+      width: 40%;
+      height: 100%;
+      left: 0;
+      top: 0;
+      background: rgba(255, 255, 255, 0.02);
+    }
 
-  .create-new:hover {
-    background-color: #50fa7b;
-    color: #0d0d0d;
-  }
-</style>
+    .create-new {
+      display: block;
+      margin-top: 20px;
+      text-decoration: none;
+      color:  #fff;
+      font-size: 18px;
+      padding: 10px;
+      border-radius: 10px;
+      transition: .3s;
+      width: 150px;
+    }
+
+    .create-new:hover {
+      background-color: #4c475a;
+    }
+  </style>
 </head>
 <body>
-<div class="container">
-  <div class="search-container">
-    <input type="text" id="search-input" placeholder="Search...">
-  </div>
-  <ul class="chat-list">
-    {% for chat in chats %}
-    <li>
-      <a href="/chat/{{chat.pk}}">
-        <h1>{{ chat.name }}</h1>
-        <div class="chat-meta">{{ chat.pk }} -- {{ chat.created_date }}</div>
+  <div class="container">
+    <div class="search-container">
+      <i class="fas fa-search search-icon"></i>
+      <input type="text" class="input" name="txt" placeholder="Search..." onmouseout="this.value = ''; this.blur();">
+    </div>
+    <a href="/chat/new" class="create-new">Create New</a>
+    <ul class="tilesWrap">
+      {% for chat in chats %}
+      <a href="/chat/{{ chat.pk }}">
+        <li>
+          <h2>{{ loop.index }}</h2>
+          <h3>{{ chat.name }}</h3>
+          <p>{{ chat.created_date }}</p>
+        </li>
       </a>
-    </li>
-    {% endfor %}
-  </ul>
-  <a href="/chat/new" class="create-new">Create New</a>
-</div>
-
+      {% endfor %}
+    </ul>
+  </div>
+  
 
   <script src="https://cdn.jsdelivr.net/npm/algoliasearch@4.23.3/dist/algoliasearch-lite.umd.js" integrity="sha256-1QNshz86RqXe/qsCBldsUu13eAX6n/O98uubKQs87UI=" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/instantsearch.js@4.69.0/dist/instantsearch.production.min.js" integrity="sha256-kvd6gxFLULpeGloorQu2Cj9XhTFztR1xTHusIyi+cLg=" crossorigin="anonymous"></script>
