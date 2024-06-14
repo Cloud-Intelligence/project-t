@@ -190,6 +190,7 @@ pre {
       <div class="message" data-id="{{message.pk}}">
           <button onclick="deleteMessage({{message.pk}})">Delete</button>
           <button onclick="starMessage({{message.pk}})" class="star-button" data-id="star-{{message.pk}}">{% if message.starred %} unkeep {% else %} keep {% endif %}</button>
+          <button onclick="toggleNoDelete({{message.pk}})" class="no-delete-button" data-id="no-delete-{{message.pk}}">{% if message.no_delete %} Delete {% else %} No Delete {% endif %}</button>
         {% autoescape off %}
             <div class="author">{% if message.role == 'user' %} Prompt {% else %} Model Result {% endif %}</div>
             <div class="message-content">{{message.parts}}</div>
@@ -208,6 +209,38 @@ pre {
 </body>
 
 <script>
+function toggleNoDelete(messageID) {
+    const selector = `.no-delete-button[data-id="no-delete-${messageID}"]`;
+    const message = document.querySelector(selector);
+    const isNoDelete = message.textContent.trim() === 'No Delete';
+
+    const url = `/api/chat/{{chat.pk}}/star-message/${messageID}/`;
+    console.log(url);
+
+    const opts = {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        }
+    };
+
+    fetch(url, opts)
+        .then((response) => {
+            if (!response.ok) {
+                throw new Error(`Network response was not ok status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then((data) => {
+            console.log(data);
+            message.textContent = isNoDelete ? 'Delete' : 'No Delete';
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+}
+
 function deleteMessage(messageID) {
     const message = document.querySelector(`.message[data-id="${messageID}"]`);
     message.remove();

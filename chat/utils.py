@@ -5,6 +5,8 @@ import google.generativeai as genai
 
 import markdown
 
+from chat.models import Message
+
 MAX_TOKENS = 128000  # Maximum number of tokens allowed
 
 
@@ -16,14 +18,22 @@ def run_llm(chat_history, context):
     models = ["gemini-1.5-flash-latest", 'gemini-1.5-pro']
     model = genai.GenerativeModel(models[0], system_instruction=context)
 
-    messages = [*chat_history]
+    messages = [
+        {"role": msg["role"], "parts": msg["parts"], "pk": msg.get("pk"), "no_delete": msg.get("no_delete", False)}
+        for msg in chat_history
+    ]
     token_count = model.count_tokens(messages)
 
     # TODO: in the future we want to mark some messages as no delete
-    # Check the number of tokens and shorten the chat history if necessary
+    permanent_messages = [msg for msg in messages if msg.get('no_delete', False)]
+    messages_to_remove = [msg for msg in messages if
+                          not msg.get('no_delete', False) and not Message.objects.filter(pk=msg['pk']).exists()]
+
     while token_count.total_tokens > MAX_TOKENS:
-        messages = messages[1:]  # Remove the oldest message from the history
-        token_count = model.count_tokens(messages)
+        messages_to_remove = messages_to_remove[1:]  # Remove the oldest message from the history
+        token_count = model.count_tokens(permanent_messages + messages_to_remove)
+
+    messages = permanent_messages + messages_to_remove
 
     response = model.generate_content(
         messages,
@@ -35,7 +45,7 @@ def run_llm(chat_history, context):
         }
     )
 
-    return response.text
+    return response.text, response.count_tokens.total_tokens
 
 
 def to_markdown(text):

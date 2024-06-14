@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 
 from chat.models import Chat, Message
 from chat.serializers import ChatSerializer
-from .utils import run_llm, to_markdown
+from .utils import run_llm, to_markdown, count_tokens
 
 
 class ChatViewSet(viewsets.GenericViewSet):
@@ -36,9 +36,9 @@ class ChatViewSet(viewsets.GenericViewSet):
 
         # call the LLM model
         # TODO: need to save the token count to the message object
-        llm_result = call_llm(instance, message)
-        Message.objects.create(chat=instance, role="user", parts=message)
-        Message.objects.create(chat=instance, role="model", parts=llm_result)
+        llm_result, token_count = call_llm(instance, message)
+        Message.objects.create(chat=instance, role="user", parts=message, tokens=token_count)
+        Message.objects.create(chat=instance, role="model", parts=llm_result, tokens=token_count)
 
         instance.save()
 
@@ -77,12 +77,16 @@ def _build_summary(context):
 
 def call_llm(instance, message):
     message_history = Message.objects.filter(chat=instance).order_by("-created_at")
-    message_history = [{"role": message.role, "parts": [message.parts]} for message in message_history]
+    message_history = [
+        {"role": message.role, "parts": [message.parts], "pk": message.pk, "no_delete": message.no_delete}
+        for message in message_history
+    ]
     context = instance.context
 
     # todo: get size of tokens here and add to object
-    message_history.append({"role": "user", "parts": [message]})
+    user_message_token_count = count_tokens(message)
+    message_history.append({"role": "user", "parts": [message], "tokens": user_message_token_count})
 
     # todo: get token size of result to add to object
-    llm_result = run_llm(message_history, context)
-    return llm_result
+    llm_result, token_count = run_llm(message_history, context)
+    return llm_result, token_count
