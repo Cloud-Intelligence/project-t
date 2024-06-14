@@ -4,9 +4,8 @@ from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
 from django.shortcuts import redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
-from django.db.models import Q, F
-
+from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank, SearchHeadline
+from django.db.models import Q
 
 from .models import Chat, Message
 from .utils import to_markdown, count_tokens
@@ -20,22 +19,45 @@ class ChatListView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['search_query'] = self.request.GET.get('q', '') 
+        query = self.request.GET.get('q', '')
+        context['search_query'] = query
+
+        if query:
+            search_query = SearchQuery(query)
+            vector = SearchVector('name', 'context')
+
+            chats = Chat.objects.annotate(
+                rank=SearchRank(vector, search_query),
+                headline_name=SearchHeadline('name', search_query, start_sel='<mark>', stop_sel='</mark>'),
+                headline_context=SearchHeadline('context', search_query, start_sel='<mark>', stop_sel='</mark>')
+            ).filter(
+                Q(rank__gte=0.001) | Q(message__parts__icontains=query)
+            ).order_by('-rank').distinct()
+
+            messages = Message.objects.filter(
+                Q(parts__icontains=query),
+                Q(chat__user=self.request.user)
+            ).select_related('chat').annotate(
+                headline_parts=SearchHeadline('parts', search_query, start_sel='<mark>', stop_sel='</mark>')
+            ).distinct()
+
+            context['chats'] = chats
+            context['messages'] = messages
+        else:
+            context['chats'] = self.get_queryset()
+
         return context
 
     def get_queryset(self):
         query = self.request.GET.get('q')
         if query:
-            chat_vector = SearchVector('name', 'context')
-            chat_query = SearchQuery(query)
-            
-            message_vector = SearchVector('message__parts')
-            message_query = SearchQuery(query)
-            
+            vector = SearchVector('name', 'context') + SearchVector('message__parts')
+            search_query = SearchQuery(query)
             return Chat.objects.annotate(
-                rank=SearchRank(chat_vector, chat_query) + SearchRank(message_vector, message_query)
+                rank=SearchRank(vector, search_query)
             ).filter(
-                Q(rank__gte=0.001)
+                rank__gte=0.001,
+                user=self.request.user
             ).order_by('-rank').distinct()
         return Chat.objects.filter(user=self.request.user).order_by('-created_date')
 

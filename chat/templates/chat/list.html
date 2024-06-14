@@ -19,8 +19,32 @@
     <ul>
       {% for chat in chats %}
         <li>
-          <a href="/chat/{{ chat.pk }}"><h1>{{ chat.name }} -- {{ chat.created_date }}</h1></a>
-          <p>{{ chat.context }}</p>
+          <a href="/chat/{{ chat.pk }}">
+            <h1>
+              {% if search_query %}
+                {{ chat.headline_name|safe }}
+              {% else %}
+                {{ chat.name }}
+              {% endif %}
+              -- {{ chat.created_date }}
+            </h1>
+          </a>
+          <p>
+            {% if search_query %}
+              {{ chat.headline_context|safe }}
+            {% else %}
+              {{ chat.context }}
+            {% endif %}
+          </p>
+          {% if search_query %}
+            <ul>
+              {% for message in messages %}
+                {% if message.chat_id == chat.id %}
+                  <li>{{ message.headline_parts|safe }}</li>
+                {% endif %}
+              {% endfor %}
+            </ul>
+          {% endif %}
         </li>
       {% endfor %}
     </ul>
