@@ -144,22 +144,23 @@
 </head>
 <body>
   <div class="container">
-    <div class="search-container">
-      <i class="fas fa-search search-icon"></i>
-      <input
-        type="text"
-        class="input"
-        name="q"
-        placeholder="Search..."
-        value="{{ search_query }}"
-        onmouseout="this.value = ''; this.blur();"
-      />
-    </div>
-    <a href="/chat/new" class="create-new">Create New</a>
+    <form method="GET" action="" id="search-form">
+      <div class="search-container">
+        <i class="fas fa-search search-icon"></i>
+        <input
+          type="text"
+          class="input"
+          name="q"
+          placeholder="Search..."
+          value="{{ search_query }}"
+        />
+      </div>
+    </form>
+    {% if search_query %}
+    <p>Results: {{ chats|length }}</p>
+    {% endif %}
     <ul class="tilesWrap">
-      {% if search_query %}
-      <p>Results: {{ chats|length }}</p>
-      {% endif %} {% if chats %} {% for chat in chats %}
+      {% if chats %} {% for chat in chats %}
       <a href="/chat/{{ chat.pk }}">
         <li>
           <h2>{{ loop.index }}</h2>
@@ -171,7 +172,18 @@
       <p>No results found.</p>
       {% endif %}
     </ul>
+    <a href="/chat/new" class="create-new">Create New</a>
   </div>
+
+  <script>
+    const searchForm = document.getElementById("search-form");
+    const searchInput = searchForm.querySelector('input[name="q"]');
+
+    searchInput.addEventListener("keyup", (event) => {
+      if (event.key === "Enter") {
+        searchForm.submit();
+      }
+    });
+  </script>
 </body>
 </html>
-
