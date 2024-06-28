@@ -6,6 +6,7 @@ from django.shortcuts import redirect
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank, SearchHeadline
 from django.db.models import Q
+import re
 
 from .models import Chat, Message
 from .utils import to_markdown, count_tokens
@@ -27,9 +28,7 @@ class ChatListView(LoginRequiredMixin, ListView):
             vector = SearchVector('name', 'context')
 
             chats = Chat.objects.annotate(
-                rank=SearchRank(vector, search_query),
-                headline_name=SearchHeadline('name', search_query, start_sel='<mark>', stop_sel='</mark>'),
-                headline_context=SearchHeadline('context', search_query, start_sel='<mark>', stop_sel='</mark>')
+                rank=SearchRank(vector, search_query)
             ).filter(
                 Q(rank__gte=0.001) | Q(message__parts__icontains=query)
             ).order_by('-rank').distinct()
@@ -37,9 +36,19 @@ class ChatListView(LoginRequiredMixin, ListView):
             messages = Message.objects.filter(
                 Q(parts__icontains=query),
                 Q(chat__user=self.request.user)
-            ).select_related('chat').annotate(
-                headline_parts=SearchHeadline('parts', search_query, start_sel='<mark>', stop_sel='</mark>')
-            ).distinct()
+            ).select_related('chat').distinct()
+
+            def highlight(text, search_query):
+                if not text:
+                    return ''
+                pattern = re.compile(re.escape(search_query), re.IGNORECASE)
+                return pattern.sub(f'<mark>{search_query}</mark>', text)
+
+            for chat in chats:
+                chat.headline_name = highlight(chat.name, query)
+                chat.headline_context = highlight(chat.context, query)
+            for message in messages:
+                message.headline_parts = highlight(message.parts, query)
 
             context['chats'] = chats
             context['messages'] = messages
