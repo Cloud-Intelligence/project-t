@@ -21,4 +21,3 @@ class Message(models.Model):
     deleted = models.BooleanField(default=False)
     tokens = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
-    no_delete = models.BooleanField(default=False)

@@ -78,7 +78,7 @@ def _build_summary(context):
 def call_llm(instance, message):
     message_history = Message.objects.filter(chat=instance).order_by("-created_at")
     message_history = [
-        {"role": message.role, "parts": [message.parts], "pk": message.pk, "no_delete": message.no_delete}
+        {"role": message.role, "parts": [message.parts], "pk": message.pk, "starred": message.starred}
         for message in message_history
     ]
     context = instance.context

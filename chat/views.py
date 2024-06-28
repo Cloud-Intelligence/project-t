@@ -41,7 +41,7 @@ class ChatDetailView(LoginRequiredMixin, DetailView):
   def get_context_data(self, **kwargs):
     context = super().get_context_data(**kwargs)
     history = Message.objects.filter(chat=context["chat"], deleted=False).order_by("created_at")
-    history = [{"role": his.role, "parts": [his.parts], "pk": his.pk, "starred": his.starred, "tokens": his.tokens, "no_delete": his.no_delete} for his in history]
+    history = [{"role": his.role, "parts": [his.parts], "pk": his.pk, "starred": his.starred, "tokens": his.tokens} for his in history]
 
     size_count_tokens = 0
 
