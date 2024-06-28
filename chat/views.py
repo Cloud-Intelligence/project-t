@@ -12,6 +12,11 @@ from .models import Chat, Message
 from .utils import to_markdown, count_tokens
 from django.conf import settings
 
+def highlight(text, search_query):
+    if not text:
+        return ''
+    pattern = re.compile(re.escape(search_query), re.IGNORECASE)
+    return pattern.sub(f'<mark>{search_query}</mark>', text)
 
 class ChatListView(LoginRequiredMixin, ListView):
     model = Chat
@@ -37,13 +42,7 @@ class ChatListView(LoginRequiredMixin, ListView):
                 Q(parts__icontains=query),
                 Q(chat__user=self.request.user)
             ).select_related('chat').distinct()
-
-            def highlight(text, search_query):
-                if not text:
-                    return ''
-                pattern = re.compile(re.escape(search_query), re.IGNORECASE)
-                return pattern.sub(f'<mark>{search_query}</mark>', text)
-
+            
             for chat in chats:
                 chat.headline_name = highlight(chat.name, query)
                 chat.headline_context = highlight(chat.context, query)
