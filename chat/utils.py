@@ -19,18 +19,19 @@ def run_llm(chat_history, context):
     model = genai.GenerativeModel(models[0], system_instruction=context)
 
     messages = [
-        {"role": msg["role"], "parts": msg["parts"], "pk": msg.get("pk"), "starred": msg.get("starred", False)}
+        {"role": msg["role"], "parts": msg["parts"], "pk": msg.get("pk"), "starred": msg.get("starred", False),
+         "tokens": msg["tokens"]}
         for msg in chat_history
     ]
-    token_count = model.count_tokens(messages)
 
-    permanent_messages = [msg for msg in messages if msg.get('starred', False)]
-    deletable_messages = [msg for msg in messages if not msg.get('starred', False)]
+    permanent_messages = [msg for msg in messages if msg['starred']]
+    deletable_messages = [msg for msg in messages if not msg['starred']]
 
-    while token_count.total_tokens > MAX_TOKENS:
+    total_tokens = sum(msg["tokens"] for msg in messages)
+
+    while total_tokens > MAX_TOKENS:
         if deletable_messages:
-            deletable_messages.pop(0)  # Remove the oldest deletable message from the history
-        token_count = model.count_tokens(permanent_messages + deletable_messages)
+            total_tokens -= deletable_messages.pop(0)["tokens"]  # Remove the oldest deletable message from the history
 
     messages = permanent_messages + deletable_messages
 
