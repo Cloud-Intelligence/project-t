@@ -7,7 +7,7 @@ from rest_framework.decorators import action
 
 from chat.models import Chat, Message
 from chat.serializers import ChatSerializer
-from .utils import run_llm, to_markdown
+from .utils import run_llm, to_markdown, natural_language_to_sql, execute_sql_query
 
 
 class ChatViewSet(viewsets.GenericViewSet):
@@ -60,6 +60,27 @@ class ChatViewSet(viewsets.GenericViewSet):
         message.starred = not message.starred
         message.save()
         return Response({"message": f"Message starred: {message.starred}"})
+
+    @action(detail=False, methods=['POST'])
+    def sql_query(self, request):
+        question = request.data.get('question')
+        db_schema = """
+            # Insert your database schema here
+            # For example:
+            # Table: sales
+            # Columns: id, date, amount, product_id
+            # Table: products
+            # Columns: id, name, price
+            """
+
+        sql_query = natural_language_to_sql(question, db_schema)
+        results = execute_sql_query(sql_query)
+
+        return Response({
+            'question': question,
+            'sql_query': sql_query,
+            'results': results
+        })
 
 
 def _build_summary(context):

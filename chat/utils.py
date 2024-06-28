@@ -4,6 +4,45 @@ import pygments
 import google.generativeai as genai
 
 import markdown
+import psycopg2
+from psycopg2.extras import RealDictCursor
+
+
+def natural_language_to_sql(question, db_schema):
+    GOOGLE_API_KEY = os.getenv('GOOGLE_API_KEY', "get_one_from_google")
+    genai.configure(api_key=GOOGLE_API_KEY)
+    model = genai.GenerativeModel('gemini-1.5-pro')
+
+    prompt = f"""
+    Given the following database schema:
+    {db_schema}
+
+    Convert the following natural language question into a SQL query:
+    "{question}"
+
+    Return only the SQL query, without any additional explanation.
+    """
+
+    response = model.generate_content(prompt)
+    return response.text.strip()
+
+
+def execute_sql_query(query):
+    # Use your database connection parameters
+    conn = psycopg2.connect(
+        dbname=os.getenv('DB_NAME'),
+        user=os.getenv('DB_USER'),
+        password=os.getenv('DB_PASSWORD'),
+        host=os.getenv('DB_HOST'),
+        port=os.getenv('DB_PORT')
+    )
+
+    with conn.cursor(cursor_factory=RealDictCursor) as cur:
+        cur.execute(query)
+        results = cur.fetchall()
+
+    conn.close()
+    return results
 
 
 def run_llm(chat_history, context):
