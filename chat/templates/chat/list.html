@@ -182,33 +182,39 @@
     <p>Results: {{ chats|length }}</p>
     {% endif %}
     <ul class="tilesWrap">
-      {% if chats %} {% for chat in chats %}
-      <a href="/chat/{{ chat.pk }}">
-        <li>
-          <h2>{{ loop.index }}</h2>
-          <h3>
+      {% if chats %}
+        {% for chat in chats %}
+          <li>
+            <a href="/chat/{{ chat.pk }}">
+              <h1>
+                {% if search_query %}
+                  {{ chat.headline_name|safe }}
+                {% else %}
+                  {{ chat.name }}
+                {% endif %}
+                -- {{ chat.created_date }}
+              </h1>
+            </a>
+            <p>
+              {% if search_query %}
+                {{ chat.headline_context|safe }}
+              {% else %}
+                {{ chat.context }}
+              {% endif %}
+            </p>
             {% if search_query %}
-              <mark>{{ chat.headline_name|safe }}</mark>
-            {% else %}
-              {{ chat.name }}
+              <ul>
+                {% for message in messages %}
+                  {% if message.chat_id == chat.id %}
+                    <li>{{ message.headline_parts|safe }}</li>
+                  {% endif %}
+                {% endfor %}
+              </ul>
             {% endif %}
-          </h3>
-          <p>{{ chat.created_date }}</p>
-          <p>
-            {% if search_query %} {{ chat.headline_context|safe }} {% else %}
-            {{ chat.context }} {% endif %}
-          </p>
-          {% if search_query %}
-          <ul>
-            {% for message in messages %} {% if message.chat_id == chat.id %}
-            <li><mark>{{ message.headline_parts|safe }}</mark></li>
-            {% endif %} {% endfor %}
-          </ul>
-          {% endif %}
-        </li>
-      </a>
-      {% endfor %} {% else %}
-      <p>No results found.</p>
+          </li>
+        {% endfor %}
+      {% else %}
+        <p>No results found.</p>
       {% endif %}
     </ul>
 
