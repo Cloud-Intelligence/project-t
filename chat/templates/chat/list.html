@@ -13,7 +13,7 @@
       margin: 0;
       padding: 20px;
       background: #19161c;
-      color: #fff;
+      color: #ffffff;
       font-family: "Courier New", monospace;
       display: flex;
       flex-direction: column;
@@ -86,6 +86,9 @@
       text-align: left;
       transition: all 0.3s ease-in-out;
     }
+    .tilesWrap li:hover {
+      background: #4c475a;
+    }
     .tilesWrap li h2 {
       font-size: 114px;
       margin: 0;
@@ -126,20 +129,36 @@
       top: 0;
       background: rgba(255, 255, 255, 0.02);
     }
-    .create-new {
-      display: block;
-      margin-top: 20px;
+    .tilesWrap a {
       text-decoration: none;
-      color: #fff;
+      color: inherit;
+    }
+    .create-new-container {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .create-new {
+      text-decoration: none;
+      color: #ffffff;
       font-size: 18px;
       padding: 10px;
       border-radius: 10px;
+      background: #3b3640;
       transition: 0.3s;
       width: 150px;
+      text-align: center;
     }
     .create-new:hover {
       background-color: #4c475a;
     }
+    mark {
+      background-color: #00FFFF; 
+      color: #000;
+      padding: 0 5px;
+      border-radius: 3px;
+    }
+    
   </style>
 </head>
 <body>
@@ -156,6 +175,9 @@
         />
       </div>
     </form>
+    <div class="create-new-container">
+      <a href="/chat/new" class="create-new">Create New</a>
+    </div>
     {% if search_query %}
     <p>Results: {{ chats|length }}</p>
     {% endif %}
@@ -195,7 +217,7 @@
         <p>No results found.</p>
       {% endif %}
     </ul>
-    <a href="/chat/new" class="create-new">Create New</a>
+
   </div>
 
   <script>
