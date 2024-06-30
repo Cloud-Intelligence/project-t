@@ -2,14 +2,16 @@ import json
 from django.views import View
 from django.views.generic.list import ListView
 from django.views.generic.detail import DetailView
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank, SearchHeadline
 from django.db.models import Q
-import re
+from django.http import JsonResponse
 
-from .models import Chat, Message
-from .utils import to_markdown, count_tokens
+import re
+from .forms import PDFUploadForm
+from .models import Chat, Message, PDFUpload
+from .utils import to_markdown, count_tokens, process_pdf
 from django.conf import settings
 
 def highlight(text, search_query):
@@ -99,3 +101,25 @@ class ChatDetailView(LoginRequiredMixin, DetailView):
     context["size_count_percentage"] = (size_count_tokens/1000000)*100
 
     return context
+
+class PDFUploadView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        chat = get_object_or_404(Chat, pk=pk)
+        form = PDFUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            pdf_upload = form.save(commit=False)
+            pdf_upload.chat = chat
+            pdf_upload.save()
+
+            summary = process_pdf(pdf_upload)
+                  
+            Message.objects.create(
+                chat=chat,
+                role="model",
+                parts=summary,
+                starred=False,
+                deleted=False,
+                tokens=0  # pdate this with the actual token count
+            )
+            return redirect('chat', pk=chat.pk)
+        return render(request, 'chat/chat.html', {'form': form, 'chat': chat})

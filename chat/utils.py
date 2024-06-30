@@ -2,6 +2,10 @@ import os
 import textwrap
 import pygments
 import google.generativeai as genai
+from google.cloud import storage
+from vertexai.generative_models import GenerativeModel, Part
+import vertexai
+from .models import Message
 
 import markdown
 
@@ -54,3 +58,29 @@ def count_tokens(messages):
     print(token_count)
 
     return token_count
+
+def process_pdf(pdf_upload):
+    project_id = os.getenv('PROJECT_ID')
+    vertexai.init(project=project_id, location="us-central1")
+
+    # Upload PDF to Google Cloud Storage
+    storage_client = storage.Client()
+    bucket_name = os.getenv('BUCKET_NAME')
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(f'pdfs/{pdf_upload.file.name}')
+    blob.upload_from_filename(pdf_upload.file.path)
+
+    pdf_uri = f'gs://{bucket_name}/pdfs/{pdf_upload.file.name}'
+
+    model = GenerativeModel(model_name="gemini-1.5-pro-001")
+
+    prompt = """
+    You are a very professional document summarization specialist.
+    Please summarize the given document.
+    """
+    
+    pdf_file = Part.from_uri(pdf_uri, mime_type="application/pdf")
+    contents = [pdf_file, prompt]
+
+    response = model.generate_content(contents)
+    return response.text if response.text else "Summary generation failed."

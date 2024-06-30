@@ -190,6 +190,13 @@ pre {
           <summary class="summary-text">Set Context</summary>
           <textarea cols="100" rows="3">{% if chat.context %}{{ chat.context }}{% endif %}</textarea>
     </details>
+    <form action="{% url 'pdf_upload' chat.pk %}" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button type="submit">Upload PDF</button>
+    </form>
+    
+
   </div>
   <div id="chat-box" class="chat-box">
       {% for message in chat.history %}

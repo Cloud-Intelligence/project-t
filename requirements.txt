@@ -9,3 +9,4 @@ pymdown-extensions
 gunicorn
 psycopg2-binary
 django-cockroachdb==4.2.*
+vertexai

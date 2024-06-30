@@ -9,6 +9,8 @@ services:
       - .:/app
     env_file:
       - .env
+    environment:
+      - GOOGLE_APPLICATION_CREDENTIALS=/app/api-key-wp-311120-3c5f1ea49e61.json
     depends_on:
       - db
 
