@@ -21,3 +21,11 @@ class Message(models.Model):
     deleted = models.BooleanField(default=False)
     tokens = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class SQLQuery(models.Model):
+    chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name='sql_queries')
+    question = models.TextField()
+    sql_query = models.TextField()
+    results = models.JSONField()
+    created_at = models.DateTimeField(auto_now_add=True)

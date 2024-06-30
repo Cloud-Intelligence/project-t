@@ -8,7 +8,7 @@ from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from django.db.models import Q
 import re
 
-from .models import Chat, Message
+from .models import Chat, Message, SQLQuery
 from .utils import to_markdown, count_tokens
 from django.conf import settings
 
@@ -97,5 +97,8 @@ class ChatDetailView(LoginRequiredMixin, DetailView):
     context["chat"].history = history
     context["size_count"] = size_count_tokens
     context["size_count_percentage"] = (size_count_tokens/1000000)*100
+
+    sql_queries = SQLQuery.objects.filter(chat=context["chat"]).order_by("-created_at")
+    context["sql_queries"] = sql_queries
 
     return context
