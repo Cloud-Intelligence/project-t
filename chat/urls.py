@@ -16,10 +16,11 @@ Including another URLconf
 """
 from django.urls import path
 
-from .views import ChatListView, ChatDetailView, create_chat
+from .views import ChatListView, ChatDetailView, create_chat, PDFUploadView
 
 urlpatterns = [
     path('', ChatListView.as_view(), name='chat_list'),
     path('new/', create_chat.as_view(), name='chat_create'),
-    path('<int:pk>/', ChatDetailView.as_view(), name='chat')
+    path('<int:pk>/', ChatDetailView.as_view(), name='chat'),
+    path('<int:pk>/upload/', PDFUploadView.as_view(), name='pdf_upload')
 ]

@@ -21,3 +21,12 @@ class Message(models.Model):
     deleted = models.BooleanField(default=False)
     tokens = models.IntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
+
+
+class PDFUpload(models.Model):
+    chat = models.ForeignKey(Chat, on_delete=models.CASCADE)
+    file = models.FileField(upload_to='pdfs/')
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.file.name
