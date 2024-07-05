@@ -2,34 +2,120 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Tutor Some stuff</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutor Some Stuff</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #19161c;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #fff;
+        }
+        .container {
+            max-width: 800px;
+            width: 90%;
+            margin: 2rem auto;
+            background: #2a2630;
+            border-radius: 10px;
+            padding: 2rem;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 2rem;
+            font-weight: 500;
+            color: #6c5ce7;
+        }
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+        }
+        .btn {
+            background-color: #6c5ce7;
+            border: none;
+            color: white;
+            padding: 12px 24px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            background-color: #5b4cdb;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .feature-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .feature-list li {
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        .feature-list li:hover {
+            transform: translateX(10px);
+            background: rgba(108, 92, 231, 0.1);
+        }
+        @media (max-width: 600px) {
+            .nav {
+                flex-direction: column;
+                align-items: center;
+            }
+            .btn {
+                width: 100%;
+                margin-bottom: 1rem;
+            }
+        }
+    </style>
 </head>
 <body>
-<a href="/accounts/logout/"><button>logout</button></a>
-<a href="/chat">CHAT</a>
-<br>
-<br>
-<br>
+    <div class="container">
+        <h1>T Project</h1>
+        <nav class="nav">
+            <a href="/accounts/logout/" class="btn">Logout</a>
+            <a href="/chat" class="btn">CHAT</a>
+        </nav>
+        <ul class="feature-list">
+            <li>Make a profile</li>
+            <li>Upload a textbook / choose a subject</li>
+            <li>Write a test to check your knowledge</li>
+            <li>Create notes of the subject</li>
+            <li>Create a study plan</li>
+            <li>Create a study group (???)</li>
+            <li>Start teaching sections through targeted questions</li>
+            <li>Create a test for the student</li>
+            <li>Mark the test with very detailed feedback</li>
+            <li>Create a study plan for the student</li>
+        </ul>
+    </div>
 
-Make a profile
-<br>
-Upload a textbook / choose a subject
-<br>
-Write a test to check your knowledge
-<br>
-Create notes of the subject
-<br>
-Create a study plan
-<br>
-Create a study group (???)
-<br>
-Start teaching sections through targeted questions
-<br>
-Create a test for the student
-<br>
-Mark the test with very detailed feedback
-<br>
-Create a study plan for the student
-<br>
+    <script>
+        document.querySelectorAll('.btn, .feature-list li').forEach(item => {
+            item.addEventListener('mouseenter', () => {
+                item.style.transition = 'all 0.3s ease';
+                item.style.transform = 'scale(1.05)';
+            });
+            item.addEventListener('mouseleave', () => {
+                item.style.transition = 'all 0.3s ease';
+                item.style.transform = 'scale(1)';
+            });
+        });
+    </script>
 </body>
 </html>
